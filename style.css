@@ -1,0 +1,832 @@
+:root {
+    --mc-bg: #8b8b8b;
+    --book-bg: #f4e8d3;
+    --text-color: #000000;
+    --border-dark: #373737;
+    --mc-btn-bg: #c6c6c6;
+}
+
+/* === Font Face for Enchantment Mode === */
+@font-face {
+    font-family: 'SGA';
+    src: url('fonts/enchant.ttf') format('truetype');
+}
+
+/* === UI Polish: Custom Crosshair Cursor === */
+body, input, button, .ql-editor {
+    cursor: crosshair !important;
+}
+
+/* === UI Polish: Minecraft Stone Scrollbars === */
+::-webkit-scrollbar {
+    width: 14px;
+}
+::-webkit-scrollbar-track {
+    background: #373737;
+    border-left: 2px solid #111;
+}
+::-webkit-scrollbar-thumb {
+    background: #8b8b8b;
+    border: 2px solid #c6c6c6;
+    border-bottom-color: #555;
+    border-right-color: #555;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* === 1. The Dynamic Shader Backgrounds === */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Pixelify Sans', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    
+    /* OVERWORLD SHADER */
+    background: linear-gradient(to bottom, #1a52b8 0%, #4a90e2 40%, #87ceeb 75%, #f2f7ec 100%);
+    background-attachment: fixed;
+    position: relative;
+    z-index: 0;
+    transition: background-color 1.5s ease;
+}
+
+/* Creating invisible layers for the Nether and End */
+body::before, body::after {
+    content: "";
+    position: fixed; 
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    transition: opacity 1.5s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* NETHER SHADER */
+body::before {
+    background: linear-gradient(to bottom, #170000 0%, #3e0000 40%, #850b0b 75%, #ff4500 100%);
+}
+
+/* THE END SHADER */
+body::after {
+    background-color: #05000a;
+    background-image: 
+        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 80px 70px, #dddddd, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 160px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 290px 40px, #aaaaaa, rgba(0,0,0,0)),
+        radial-gradient(2.5px 2.5px at 330px 180px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 450px 250px, #dddddd, rgba(0,0,0,0)),
+        radial-gradient(circle at 50% 120%, #3a0066 0%, rgba(0,0,0,0) 70%);
+    background-size: 400px 400px, 400px 400px, 400px 400px, 400px 400px, 400px 400px, 400px 400px, cover;
+}
+
+/* Triggers to smoothly fade the dimensions in */
+body.theme-nether::before { opacity: 1; }
+body.theme-end::after { opacity: 1; }
+
+/* === NEW: Weather Overlay System === */
+#weather-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; 
+    z-index: 1; 
+    opacity: 0;
+    transition: opacity 2s ease; 
+}
+
+/* Stormy Sky Overrides */
+body.weather-rain, body.weather-snow {
+    background: linear-gradient(to bottom, #4a525c 0%, #6f7c85 40%, #90a0a8 75%, #b5c3cc 100%);
+}
+
+/* The Rain Animation */
+body.weather-rain #weather-overlay {
+    opacity: 1;
+    background-image: repeating-linear-gradient(15deg, transparent, transparent 15px, rgba(150, 200, 255, 0.15) 15px, rgba(150, 200, 255, 0.15) 16px);
+    background-size: 30px 100px;
+    animation: fallRain 0.4s linear infinite;
+}
+
+@keyframes fallRain {
+    0% { background-position: 0 0; }
+    100% { background-position: -30px 100px; }
+}
+
+/* The Snow Animation */
+body.weather-snow #weather-overlay {
+    opacity: 1;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(3px 3px at 80px 70px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 150px 160px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(4px 4px at 250px 90px, rgba(255,255,255,0.5), transparent);
+    background-size: 300px 300px;
+    animation: fallSnow 4s linear infinite;
+}
+
+@keyframes fallSnow {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 300px; }
+}
+
+
+#sidebar {
+    width: 230px; /* Scaled down */
+    background-color: rgba(0, 0, 0, 0.7);
+    border-right: 4px solid var(--border-dark);
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    box-sizing: border-box;
+    color: white;
+}
+
+/* === The Compass (Search Bar) === */
+#search-container {
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--border-dark);
+}
+#search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #222;
+    border: 2px solid #000;
+    border-bottom-color: #444;
+    border-right-color: #444;
+    color: #aaa;
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 1rem;
+    padding: 8px;
+    outline: none;
+}
+#search-input:focus {
+    color: #fff;
+    border-color: #555;
+    border-bottom-color: #fff;
+    border-right-color: #fff;
+}
+
+#new-btn {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 1.1rem;
+    padding: 12px;
+    background-color: var(--mc-btn-bg);
+    color: #212121;
+    border: 3px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-bottom-color: #555555;
+    border-right-color: #555555;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 0px #ffffff;
+    transition: transform 0.1s;
+}
+
+#new-btn:active {
+    border-top-color: #555555;
+    border-left-color: #555555;
+    border-bottom-color: #ffffff;
+    border-right-color: #ffffff;
+    background-color: #b0b0b0;
+    transform: scale(0.98);
+}
+
+#entry-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.entry-item {
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: rgba(0, 0, 0, 0.4); 
+    color: #aaaaaa;
+    cursor: pointer;
+    border: 2px solid #373737; 
+    border-bottom-color: #777;
+    border-right-color: #777;
+    font-size: 1.1rem;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+}
+
+.entry-item::before {
+    content: ">"; 
+    margin-right: 10px;
+    font-size: 1.2rem;
+    color: #777777; 
+}
+
+.entry-item.active::before {
+    color: #ffffff; 
+}
+
+.entry-item:hover {
+    color: #ffffff;
+}
+
+.entry-item.active {
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#editor-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px; 
+}
+
+#book-gui {
+    width: 450px; /* Scaled down */
+    max-width: 95vw; 
+    height: 90vh; 
+    max-height: 620px; /* Scaled down */
+    background: linear-gradient(to bottom right, #f4e8d3, #e2d4b7);
+    border: 4px solid #1e1e1e; 
+    border-radius: 2px;
+    padding: 25px;
+    box-shadow: 10px 10px 0px rgba(0,0,0,0.5); 
+    display: flex;
+    flex-direction: column;
+    transform-origin: center;
+}
+
+@keyframes openBook {
+    0% { transform: scale(0.8) rotateX(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotateX(0deg); opacity: 1; }
+}
+
+.book-animate {
+    animation: openBook 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.book-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 3px solid #c0b39a;
+    padding-bottom: 10px;
+}
+
+#title-input {
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    width: 75%;
+    outline: none;
+}
+
+#title-input::placeholder {
+    color: #888;
+}
+
+#save-status {
+    font-size: 1.2rem;
+    color: #555;
+    background-color: rgba(0,0,0,0.1);
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.ql-toolbar.ql-snow {
+    border: none !important; 
+    border-bottom: 2px solid #c0b39a !important; 
+    background-color: transparent !important;
+    padding-left: 0 !important;
+    margin-bottom: 15px;
+}
+
+.ql-toolbar.ql-snow button {
+    border: 2px solid !important;
+    border-top-color: #ffffff !important;
+    border-left-color: #ffffff !important;
+    border-bottom-color: #555555 !important;
+    border-right-color: #555555 !important;
+    background-color: var(--mc-btn-bg);
+    margin-right: 5px;
+    border-radius: 0 !important;
+}
+
+.ql-toolbar.ql-snow button:hover {
+    background-color: #dfdfdf !important;
+}
+
+.ql-toolbar.ql-snow button.ql-active {
+    border-top-color: #555555 !important;
+    border-left-color: #555555 !important;
+    border-bottom-color: #ffffff !important;
+    border-right-color: #ffffff !important;
+    background-color: #a0a0a0 !important;
+}
+
+.ql-container.ql-snow {
+    border: none !important;
+    font-family: 'Pixelify Sans', sans-serif !important;
+    font-size: 1.25rem !important;
+    color: var(--text-color);
+    flex-grow: 1;
+    min-height: 0; 
+    display: flex;
+    flex-direction: column;
+}
+
+.ql-editor {
+    padding: 0;
+    line-height: 1.2;
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto !important; 
+    overflow-x: hidden;
+    padding-right: 10px; 
+}
+
+/* === Enchantment Mode (Secret Venting Text) === */
+.ql-editor code {
+    font-family: 'SGA', sans-serif !important;
+    font-size: 1.4rem;
+    background-color: rgba(100, 0, 150, 0.1) !important;
+    color: #a252ff !important; 
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid rgba(162, 82, 255, 0.3);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+    white-space: pre-wrap; 
+}
+
+/* === Minecraft Paintings (Image Support) === */
+.ql-editor img {
+    display: block;
+    max-width: 90%;
+    margin: 15px auto; 
+    border: 6px solid #3d2314; 
+    border-top-color: #5a3a1f; 
+    border-left-color: #5a3a1f;
+    background-color: #dfcdb3; 
+    padding: 6px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
+    image-rendering: pixelated; 
+}
+
+/* === The XP Bar (Word Count) === */
+#xp-bar-container {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background-color: #222;
+    border: 2px solid #000;
+    border-radius: 2px;
+    margin-top: 15px;
+    box-shadow: inset 0px 2px 0px rgba(0,0,0,0.5);
+}
+#xp-bar-fill {
+    height: 100%;
+    width: 0%; 
+    background: linear-gradient(to bottom, #80ff20, #40a000);
+    transition: width 0.3s ease-out;
+}
+#xp-level {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #80ff20;
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 1.6rem;
+    text-shadow: 2px 2px 0px #000;
+    font-weight: bold;
+}
+
+#storage-controls {
+    margin-top: 20px;
+    border-top: 4px solid var(--border-dark);
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mc-btn {
+    font-family: 'Pixelify Sans', sans-serif;
+    background-color: var(--mc-btn-bg);
+    color: #212121;
+    border: 3px solid;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-bottom-color: #555555;
+    border-right-color: #555555;
+    cursor: pointer;
+    text-shadow: 1px 1px 0px #ffffff;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.mc-btn:active {
+    border-top-color: #555555;
+    border-left-color: #555555;
+    border-bottom-color: #ffffff;
+    border-right-color: #ffffff;
+    background-color: #b0b0b0;
+}
+
+.small-btn {
+    font-size: 1rem;
+    padding: 8px;
+    width: 100%;
+}
+
+.import-label {
+    display: inline-block;
+}
+
+#advancement-toast {
+    position: fixed;
+    top: 20px;
+    right: -350px; 
+    width: 320px;
+    background-color: rgba(33, 33, 33, 0.9);
+    border: 3px solid #555555;
+    border-top-color: #888888;
+    border-left-color: #888888;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.6);
+    transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+    font-family: 'Pixelify Sans', sans-serif;
+}
+
+#advancement-toast.show {
+    right: 20px; 
+}
+
+.toast-icon {
+    font-size: 2.5rem;
+    margin-right: 15px;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.toast-title {
+    color: #ffff55; 
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+    text-shadow: 2px 2px 0px #3f3f15;
+}
+
+#toast-desc {
+    font-size: 1.1rem;
+    color: #ffffff;
+    text-shadow: 2px 2px 0px #3f3f3f;
+}
+
+/* === Dimension Tags with Image Support === */
+#dimension-tags {
+    display: flex;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.dim-btn {
+    background: var(--mc-btn-bg);
+    border: 2px solid #555;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    cursor: pointer;
+    padding: 2px;
+    opacity: 0.5;
+    transition: all 0.2s;
+    filter: grayscale(100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dim-btn img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    image-rendering: pixelated; 
+}
+
+.dim-btn:hover {
+    opacity: 0.8;
+}
+
+.dim-btn.active {
+    opacity: 1;
+    filter: grayscale(0%);
+    border-top-color: #555;
+    border-left-color: #555;
+    border-bottom-color: #fff;
+    border-right-color: #fff;
+    background: #a0a0a0;
+}
+
+/* === Dimension Book Tints === */
+body.theme-nether #book-gui {
+    background: linear-gradient(to bottom right, #d4b5b5, #a37c7c);
+}
+
+body.theme-end #book-gui {
+    background: linear-gradient(to bottom right, #d9d9bc, #b3b38c);
+}
+
+/* === Campfire Mode (Zen Focus) Update === */
+body.zen-mode {
+    background: #080808 !important; 
+}
+
+body.zen-mode::before, 
+body.zen-mode::after {
+    opacity: 0 !important; 
+}
+
+body.zen-mode #sidebar {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none; 
+}
+
+#sidebar {
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+body.zen-mode #book-gui {
+    box-shadow: 0 0 60px 15px rgba(255, 140, 0, 0.15), 10px 10px 0px rgba(0,0,0,0.8);
+    transition: box-shadow 1.5s ease;
+}
+
+/* === Hover "X" Delete Button === */
+.entry-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delete-x {
+    color: #ff5555;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none; 
+    padding: 0 5px;
+}
+
+.entry-item:hover .delete-x {
+    display: block;
+}
+
+.delete-x:hover {
+    color: #ff0000;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+
+/* === The Jukebox Player === */
+#jukebox-container {
+    margin-top: 20px;
+    border-top: 4px solid var(--border-dark);
+    padding-top: 15px;
+}
+
+#now-playing {
+    color: #55ff55; 
+    font-size: 1rem;
+    margin-bottom: 8px;
+    text-align: center;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.jukebox-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#volume-slider {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #8b8b8b; 
+}
+
+/* === Floating Exit Button === */
+#exit-zen-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: none; /* Hidden by default */
+    z-index: 1000;
+    padding: 10px 15px;
+}
+
+body.zen-mode #exit-zen-btn {
+    display: block; /* Only shows when Zen mode is active */
+}
+
+/* === Campfire Mode: Dark Night Sky === */
+body.zen-mode {
+    background: linear-gradient(to top, #050510 0%, #020205 100%) !important; 
+}
+
+/* Reusing the End Stars for the Night Sky! */
+body.zen-mode::after {
+    opacity: 0.6 !important; 
+    background-color: transparent;
+    background-image: 
+        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 80px 70px, #dddddd, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 160px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 290px 40px, #aaaaaa, rgba(0,0,0,0)),
+        radial-gradient(2.5px 2.5px at 330px 180px, #ffffff, rgba(0,0,0,0));
+    background-size: 400px 400px, 400px 400px, 400px 400px, 400px 400px, 400px 400px;
+}
+
+/* === Campfire Sparks === */
+#sparks-container {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    display: none;
+    overflow: hidden;
+}
+
+body.zen-mode #sparks-container {
+    display: block;
+}
+
+.spark {
+    position: absolute;
+    bottom: -10px;
+    width: 6px;
+    height: 6px;
+    background-color: #ffaa00;
+    box-shadow: 0 0 8px #ff4400, 0 0 15px #ff0000;
+    animation: floatSpark linear forwards;
+    opacity: 0;
+}
+
+@keyframes floatSpark {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100vh) translateX(var(--drift)) scale(0); opacity: 0; }
+}
+
+/* === FIX: Exit Zen Button Width === */
+#exit-zen-btn {
+    width: auto !important; /* This stops it from stretching across the screen! */
+    font-size: 1.1rem;
+}
+
+/* === Mobile Menu Button & Overlay === */
+#mobile-menu-btn {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 900;
+    padding: 8px 12px;
+    font-size: 1.5rem;
+}
+
+#mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 950;
+}
+
+/* === MOBILE RESPONSIVENESS (Screens smaller than 768px) === */
+@media (max-width: 768px) {
+    #mobile-menu-btn {
+        display: block; 
+        top: 10px; left: 10px;
+        background-color: rgba(198, 198, 198, 0.9); 
+    }
+    
+    body.zen-mode #mobile-menu-btn {
+        display: none; 
+    }
+
+    #sidebar {
+        position: fixed;
+        left: -100%; 
+        top: 0;
+        height: 100%;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.8);
+    }
+
+    #sidebar.open { left: 0; }
+    #mobile-overlay.open { display: block; }
+
+    /* === The Bulletproof Mobile Book Fix === */
+    #book-gui {
+        width: 95vw;
+        /* Uses 'dvh' (Dynamic Viewport Height) so it doesn't break when the mobile keyboard pops up! */
+        height: calc(100dvh - 80px); 
+        max-height: none; 
+        margin-top: 60px; 
+        padding: 12px; /* Tighter padding to give him more room to write */
+        border-width: 3px; 
+    }
+
+    .book-header { 
+        margin-bottom: 5px; 
+        padding-bottom: 5px; 
+    }
+    
+    #title-input { 
+        font-size: 1.4rem; 
+        width: 100%; 
+    }
+
+    .book-sub-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    /* Shrink the dimension icons just a tiny bit */
+    #dimension-tags { gap: 4px; }
+    .dim-btn { padding: 4px; }
+    .dim-btn img { width: 16px; height: 16px; }
+
+    /* === The Toolbar Wrap Fix === */
+    .ql-toolbar.ql-snow {
+        display: flex;
+        flex-wrap: wrap; /* Lets the buttons neatly drop to a second row */
+        gap: 4px; 
+        padding-bottom: 5px !important;
+    }
+
+    .ql-toolbar.ql-snow button {
+        width: 28px;
+        height: 28px;
+        margin-right: 0; 
+    }
+
+    .ql-container.ql-snow {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* === NEW: Nether Ash & Ender Dust Particles === */
+
+/* The Nether Ash Animation */
+body.theme-nether #weather-overlay {
+    opacity: 1;
+    /* Draws glowing orange and red embers */
+    background-image: 
+        radial-gradient(2px 2px at 40px 60px, rgba(255, 150, 0, 0.8), transparent),
+        radial-gradient(3px 3px at 120px 150px, rgba(255, 50, 0, 0.6), transparent),
+        radial-gradient(1.5px 1.5px at 200px 80px, rgba(255, 100, 0, 0.9), transparent),
+        radial-gradient(2.5px 2.5px at 300px 250px, rgba(255, 200, 0, 0.5), transparent);
+    background-size: 350px 350px;
+    animation: floatAsh 6s linear infinite;
+}
+
+@keyframes floatAsh {
+    0% { background-position: 0 0; }
+    100% { background-position: -50px -350px; /* Floats upwards and drifts left */ }
+}
+
+/* The End Dust Animation */
+body.theme-end #weather-overlay {
+    opacity: 1;
+    /* Draws magical purple floating specks */
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, rgba(200, 0, 255, 0.8), transparent),
+        radial-gradient(3px 3px at 80px 70px, rgba(150, 0, 255, 0.6), transparent),
+        radial-gradient(1.5px 1.5px at 150px 160px, rgba(255, 0, 255, 0.9), transparent),
+        radial-gradient(2.5px 2.5px at 250px 90px, rgba(100, 0, 255, 0.5), transparent);
+    background-size: 300px 300px;
+    animation: floatEnder 15s linear infinite alternate;
+}
+
+@keyframes floatEnder {
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 150px; /* Slow, lazy, magical drifting */ }
+}
+
+/* Ensure all weather/particles hide during Campfire Mode so it stays cozy! */
+body.zen-mode #weather-overlay {
+    opacity: 0 !important;
+}

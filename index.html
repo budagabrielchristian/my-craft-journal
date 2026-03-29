@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Craft Journal</title>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="mobile-overlay"></div>
+    <button id="mobile-menu-btn" class="mc-btn">☰</button>
+
+    <div id="weather-overlay"></div>
+
+    <div id="sidebar">
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="> Search books...">
+        </div>
+
+        <button id="new-btn" class="mc-btn">Write New Book</button>
+        <ul id="entry-list">
+            </ul>
+        
+        <div id="storage-controls">
+            <button id="export-btn" class="mc-btn small-btn">Export Chest (Save)</button>
+            <label for="import-file" class="mc-btn small-btn import-label">Import Chest (Load)</label>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="zen-btn" class="mc-btn small-btn" style="margin-top: 15px;">Campfire Mode</button>
+        </div>
+
+        <div id="jukebox-container">
+            <div id="now-playing">Music: Paused</div>
+            <div class="jukebox-controls">
+                <button id="play-pause-btn" class="mc-btn small-btn">🎵 Play Music</button>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.3" title="Volume">
+            </div>
+        </div>
+    </div>
+
+    <div id="editor-container">
+        <div id="book-gui" class="book-animate">
+            <div class="book-header">
+                <input type="text" id="title-input" placeholder="Title...">
+            </div>
+            <div class="book-sub-header">
+                <div id="dimension-tags">
+                    <button class="dim-btn active" data-dim="overworld" title="Overworld (Calm)"><img src="images/OW.png" alt="OW"></button>
+                    <button class="dim-btn" data-dim="nether" title="The Nether (Venting)"><img src="images/NT.png" alt="NT"></button>
+                    <button class="dim-btn" data-dim="end" title="The End (Reflective)"><img src="images/EN.png" alt="EN"></button>
+                </div>
+                <span id="save-status">Saved!</span>
+            </div>
+            
+            <div id="quill-editor"></div>
+            
+            <div id="xp-bar-container">
+                <div id="xp-bar-fill"></div>
+                <div id="xp-level">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sparks-container"></div>
+    <button id="exit-zen-btn" class="mc-btn small-btn">Exit Campfire</button>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="script.js"></script>
+
+    <div id="advancement-toast">
+        <div class="toast-icon">!</div>
+        <div class="toast-text">
+            <div class="toast-title">Advancement Made!</div>
+            <div id="toast-desc">Wrote for 3 Days Straight</div>
+        </div>
+    </div>
+
+</body>
+</html>
