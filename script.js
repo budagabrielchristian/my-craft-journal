@@ -149,24 +149,36 @@ deleteBtn.addEventListener('click', () => {
 });
 
 // === Helper logic to calculate streaks for both saving and progress viewing ===
+// === FIXED STREAK LOGIC ===
 function calculateCurrentStreak() {
     if (entries.length === 0) return 0;
+    
+    // Convert all dates to standard midnight timestamps to avoid the Javascript Month Bug!
     const daysWritten = [...new Set(entries.map(e => {
         const d = new Date(e.date);
-        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    }))].sort((a, b) => new Date(b) - new Date(a)); 
+        d.setHours(0, 0, 0, 0); // Strip away the time, keep only the day
+        return d.getTime();
+    }))].sort((a, b) => b - a); // Sort newest to oldest
 
     let streak = 0;
     let checkDate = new Date();
-    checkDate.setHours(0,0,0,0);
+    checkDate.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < daysWritten.length; i++) {
-        const writeDate = new Date(daysWritten[i]);
-        if (writeDate.getTime() === checkDate.getTime()) {
-            streak++; checkDate.setDate(checkDate.getDate() - 1); 
-        } else if (i === 0 && Math.abs(new Date() - writeDate) < 172800000) {
-            checkDate.setDate(checkDate.getDate() - 1); i--; 
-        } else { break; }
+        const checkTime = checkDate.getTime();
+        
+        if (daysWritten[i] === checkTime) {
+            // They wrote today!
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1); 
+        } else if (i === 0 && daysWritten[i] === new Date(new Date().setHours(0,0,0,0)).setDate(new Date().getDate() - 1)) {
+            // They haven't written today yet, but wrote yesterday (streak is still alive)
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 2); 
+        } else {
+            // Streak broken
+            break; 
+        }
     }
     return streak;
 }
