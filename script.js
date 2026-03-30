@@ -40,7 +40,7 @@ function playSound(sound) {
     sound.play().catch(e => console.log("Sound skipped"));
 }
 
-// === NEW: Permanent Advancements System ===
+// === Permanent Advancements System ===
 let unlockedAdvs = JSON.parse(localStorage.getItem('mcAdvs')) || [];
 
 function unlockAdvancement(id, title) {
@@ -54,20 +54,21 @@ function unlockAdvancement(id, title) {
 
 function updateAdvancementsUI() {
     document.querySelectorAll('.adv-node').forEach(node => {
+        const img = node.querySelector('img');
         if (unlockedAdvs.includes(node.id)) {
             node.classList.remove('locked');
             node.classList.add('unlocked');
-            const img = node.querySelector('img');
-            if(img) { 
-                img.style.filter = 'grayscale(0%)'; 
-                img.style.opacity = '1'; 
-            }
+            if(img) { img.style.filter = 'grayscale(0%)'; img.style.opacity = '1'; }
+        } else {
+            node.classList.add('locked');
+            node.classList.remove('unlocked');
+            if(img) { img.style.filter = 'grayscale(100%)'; img.style.opacity = '0.5'; }
         }
     });
 }
 
 function init() {
-    updateAdvancementsUI(); // Load saved advancements visually
+    updateAdvancementsUI(); 
     renderList();
     if (entries.length > 0) {
         loadEntry(entries[0].id);
@@ -76,10 +77,8 @@ function init() {
     }
 }
 
-// === UPDATE: Row-Based Inventory rendering ===
 function renderList(searchTerm = "") {
     listEl.innerHTML = '';
-    
     const filteredEntries = entries.filter(e => {
         if (!e) return false; 
         const title = (e.title || "Untitled Book").toLowerCase();
@@ -102,11 +101,8 @@ function renderList(searchTerm = "") {
         slot.onclick = () => {
             playSound(clickSound);
             loadEntry(entry.id);
-            if (sidebar.classList.contains('open')) {
-                toggleMobileMenu();
-            }
+            if (sidebar.classList.contains('open')) toggleMobileMenu();
         };
-        
         listEl.appendChild(slot);
     });
 }
@@ -120,10 +116,7 @@ function triggerAnimation() {
 function loadEntry(id) {
     const entry = entries.find(e => e && e.id === id);
     if (entry) {
-        if (currentId !== id) {
-            triggerAnimation();
-            playSound(pageSound);
-        }
+        if (currentId !== id) { triggerAnimation(); playSound(pageSound); }
         currentId = id;
         titleInput.value = entry.title || "";
         quill.root.innerHTML = entry.content || ""; 
@@ -135,40 +128,48 @@ function loadEntry(id) {
 
 function createNewEntry() {
     playSound(pageSound);
-    const newEntry = {
-        id: Date.now().toString(),
-        title: "",
-        content: "",
-        date: Date.now(),
-        dimension: "overworld"
-    };
+    const newEntry = { id: Date.now().toString(), title: "", content: "", date: Date.now(), dimension: "overworld" };
     entries.push(newEntry);
     loadEntry(newEntry.id);
     titleInput.focus();
-    
-    // Check Achievement
     unlockAdvancement('adv-authors', "Author's Journey");
 }
 
-// === NEW: Delete Button Logic ===
 const deleteBtn = document.getElementById('delete-btn');
 deleteBtn.addEventListener('click', () => {
-    // Standard browser confirmation popup before deleting!
     if(confirm("Are you sure you want to throw this book in the lava? This cannot be undone!")) {
         playSound(clickSound);
-        // Filter out the current book
         entries = entries.filter(e => e.id !== currentId);
-        // Save the new list
         localStorage.setItem('mcJournals', JSON.stringify(entries));
+        unlockAdvancement('adv-delete', 'Playing with Fire'); // Lava Bucket Adv!
         
-        // Load the next book, or create a new one if empty
-        if(entries.length > 0) {
-            loadEntry(entries[0].id);
-        } else {
-            createNewEntry();
-        }
+        if(entries.length > 0) { loadEntry(entries[0].id); } 
+        else { createNewEntry(); }
     }
 });
+
+// === Helper logic to calculate streaks for both saving and progress viewing ===
+function calculateCurrentStreak() {
+    if (entries.length === 0) return 0;
+    const daysWritten = [...new Set(entries.map(e => {
+        const d = new Date(e.date);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    }))].sort((a, b) => new Date(b) - new Date(a)); 
+
+    let streak = 0;
+    let checkDate = new Date();
+    checkDate.setHours(0,0,0,0);
+
+    for (let i = 0; i < daysWritten.length; i++) {
+        const writeDate = new Date(daysWritten[i]);
+        if (writeDate.getTime() === checkDate.getTime()) {
+            streak++; checkDate.setDate(checkDate.getDate() - 1); 
+        } else if (i === 0 && Math.abs(new Date() - writeDate) < 172800000) {
+            checkDate.setDate(checkDate.getDate() - 1); i--; 
+        } else { break; }
+    }
+    return streak;
+}
 
 function triggerSave() {
     saveStatus.innerText = "Saving...";
@@ -182,27 +183,47 @@ function triggerSave() {
             localStorage.setItem('mcJournals', JSON.stringify(entries));
             saveStatus.innerText = "Saved!";
             renderList(searchInput.value); 
-            checkStreak(); 
         }
 
-        // Count words for XP and 10k Achievement
+        // --- Core Stats ---
         let totalWordsAllBooks = 0;
         entries.forEach(e => {
-            // Strip HTML to get real text
-            const textOnly = e.content.replace(/<[^>]*>?/gm, '');
-            const count = textOnly.trim().length > 0 ? textOnly.trim().split(/\s+/).length : 0;
-            totalWordsAllBooks += count;
+            const textOnly = (e.content || "").replace(/<[^>]*>?/gm, '');
+            totalWordsAllBooks += textOnly.trim().length > 0 ? textOnly.trim().split(/\s+/).length : 0;
         });
-        
         const currentText = quill.getText().trim();
         const currentWordCount = currentText.length > 0 ? currentText.split(/\s+/).length : 0;
         
         xpLevel.innerText = currentWordCount; 
-        const progress = (currentWordCount % 50) / 50 * 100; 
-        xpFill.style.width = `${progress}%`;
+        xpFill.style.width = `${(currentWordCount % 50) / 50 * 100}%`;
         
-        // Achievement Check
+        // --- Advancement Checks ---
         if(totalWordsAllBooks >= 10000) unlockAdvancement('adv-10k', 'Librarian');
+        
+        const streak = calculateCurrentStreak();
+        if(streak >= 3) unlockAdvancement('adv-streak-3', 'Getting Wood');
+        if(streak >= 7) unlockAdvancement('adv-streak-7', 'Time to Mine!');
+        if(streak >= 30) unlockAdvancement('adv-streak-30', 'Diamonds!');
+        if(streak >= 64) unlockAdvancement('adv-streak-64', 'A Full Stack');
+
+        // Editor Formatting Detectors
+        const html = quill.root.innerHTML;
+        if (html.includes('<img')) unlockAdvancement('adv-img', 'Masterpiece');
+        if (html.includes('SGA') || html.includes('ql-code-block-container')) unlockAdvancement('adv-code', 'Enchanter');
+        if (html.includes('<li>')) unlockAdvancement('adv-bullet', 'Organized Mind');
+        if (html.includes('color:') || html.includes('background-color:')) unlockAdvancement('adv-color', 'Colorful Personality');
+
+        // Time Checkers
+        const hour = new Date().getHours();
+        if (hour >= 0 && hour < 4) unlockAdvancement('adv-night', 'Night Owl');
+        if (hour >= 5 && hour < 8) unlockAdvancement('adv-early', 'Early Bird');
+        
+        // Weather Checker
+        if (document.body.classList.contains('weather-rain') || document.body.classList.contains('weather-snow')) {
+            if(document.querySelector('.dim-btn.active').dataset.dim === 'overworld') {
+                unlockAdvancement('adv-storm', 'Shelter from the Storm');
+            }
+        }
 
     }, 500);
 }
@@ -216,15 +237,12 @@ function exportData() {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
-    
-    // Achievement Check
     unlockAdvancement('adv-storage', 'Safe Storage');
 }
 
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
@@ -242,41 +260,6 @@ function importData(event) {
     event.target.value = ''; 
 }
 
-function checkStreak() {
-    if (entries.length === 0) return;
-
-    const daysWritten = [...new Set(entries.map(e => {
-        const d = new Date(e.date);
-        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    }))];
-
-    daysWritten.sort((a, b) => new Date(b) - new Date(a)); 
-
-    let streak = 0;
-    let checkDate = new Date();
-    checkDate.setHours(0,0,0,0);
-
-    for (let i = 0; i < daysWritten.length; i++) {
-        const writeDate = new Date(daysWritten[i]);
-        if (writeDate.getTime() === checkDate.getTime()) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1); 
-        } else if (i === 0 && Math.abs(new Date() - writeDate) < 172800000) {
-            checkDate.setDate(checkDate.getDate() - 1);
-            i--; 
-        } else { break; }
-    }
-
-    const milestones = [3, 7, 14, 30, 64, 100]; 
-    if (milestones.includes(streak) && new Date(daysWritten[0]).getDate() === new Date().getDate()) {
-        const lastMilestone = localStorage.getItem('lastMilestone');
-        if (lastMilestone !== streak.toString()) {
-            showAdvancement(`Consistent Crafter: ${streak} Day Streak!`);
-            localStorage.setItem('lastMilestone', streak.toString());
-        }
-    }
-}
-
 function showAdvancement(message) {
     const toast = document.getElementById('advancement-toast');
     const desc = document.getElementById('toast-desc');
@@ -289,21 +272,17 @@ function showAdvancement(message) {
 const dimBtns = document.querySelectorAll('.dim-btn');
 const zenBtn = document.getElementById('zen-btn');
 let isZenMode = false;
+let weatherTimer; 
 
 dimBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         playSound(clickSound);
         const selectedDim = e.target.closest('.dim-btn').dataset.dim;
         const entryIndex = entries.findIndex(e => e.id === currentId);
-        if (entryIndex !== -1) {
-            entries[entryIndex].dimension = selectedDim;
-            triggerSave();
-        }
+        if (entryIndex !== -1) { entries[entryIndex].dimension = selectedDim; triggerSave(); }
         applyDimension(selectedDim);
     });
 });
-
-let weatherTimer; 
 
 function applyDimension(dim) {
     dimBtns.forEach(b => b.classList.remove('active'));
@@ -312,16 +291,12 @@ function applyDimension(dim) {
     document.body.className = ''; 
     document.body.classList.remove('weather-rain', 'weather-snow');
     if (rainAudio) rainAudio.pause(); 
-    
     clearInterval(weatherTimer); 
     
     if (dim !== 'overworld') {
         document.body.classList.add(`theme-${dim}`);
-        
-        // Check Achievements
         if(dim === 'nether') unlockAdvancement('adv-nether', 'We Need to Go Deeper');
         if(dim === 'end') unlockAdvancement('adv-end', 'The End?');
-        
     } else if (!isZenMode) {
         rollWeather(); 
         checkTimeOfDay(); 
@@ -348,22 +323,16 @@ function rollWeather() {
         document.body.classList.add('weather-rain');
         if (isMusicPlaying) rainAudio.play().catch(e => console.log("Rain blocked"));
     } 
-    else if (chance < 0.50) { 
-        document.body.classList.add('weather-snow');
-        if (rainAudio) rainAudio.pause(); 
-    } else {
-        if (rainAudio) rainAudio.pause();
-    }
+    else if (chance < 0.50) { document.body.classList.add('weather-snow'); if (rainAudio) rainAudio.pause(); } 
+    else { if (rainAudio) rainAudio.pause(); }
 }
 
 const playPauseBtn = document.getElementById('play-pause-btn');
 const volumeSlider = document.getElementById('volume-slider');
 const nowPlayingText = document.getElementById('now-playing');
-
 const musicTracks = { overworld: new Audio('sounds/music-ow.mp3'), nether: new Audio('sounds/music-nt.mp3'), end: new Audio('sounds/music-en.mp3') };
 const rainAudio = new Audio('sounds/rain.mp3');
 rainAudio.loop = true;
-
 Object.values(musicTracks).forEach(track => track.loop = true);
 
 let currentMusic = musicTracks.overworld; 
@@ -380,6 +349,7 @@ playPauseBtn.addEventListener('click', () => {
         currentMusic.play().catch(e => console.log("Music play blocked"));
         if (document.body.classList.contains('weather-rain')) rainAudio.play();
         nowPlayingText.innerText = `Playing: ${activeDim.charAt(0).toUpperCase() + activeDim.slice(1)}`;
+        unlockAdvancement('adv-music', 'Music to my Ears'); // Music Adv!
     } else {
         playPauseBtn.innerText = "🎵 Play Music";
         currentMusic.pause();
@@ -409,7 +379,6 @@ const exitZenBtn = document.getElementById('exit-zen-btn');
 const sparksContainer = document.getElementById('sparks-container');
 const campfireAudio = new Audio('sounds/campfire.mp3');
 campfireAudio.loop = true;
-
 let sparkInterval;
 
 function createSpark() {
@@ -426,13 +395,10 @@ function createSpark() {
 function toggleZenMode() {
     isZenMode = !isZenMode;
     playSound(clickSound);
-    
     if (isZenMode) {
         document.body.classList.add('zen-mode');
         campfireAudio.play().catch(e => console.log("Campfire audio blocked"));
         sparkInterval = setInterval(createSpark, 150);
-        
-        // Achievement Check
         unlockAdvancement('adv-zen', 'Zen Master');
     } else {
         document.body.classList.remove('zen-mode');
@@ -483,9 +449,43 @@ document.addEventListener('keydown', (e) => {
     const target = e.target;
     if (!target) return;
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target.classList && target.classList.contains('ql-editor'))) return;
-    
     if (e.key === 'l' || e.key === 'L') toggleAdvancements();
 });
 
-// Start the app!
+// === NEW: Clickable Progress Tracker ===
+document.querySelectorAll('.adv-node').forEach(node => {
+    node.addEventListener('click', () => {
+        playSound(clickSound);
+        const progressDiv = node.querySelector('.adv-progress');
+        const id = node.id;
+        
+        // Hide all other open progress bars first for cleanliness
+        document.querySelectorAll('.adv-progress').forEach(p => p.classList.add('hidden'));
+        
+        // Show this specific progress bar
+        progressDiv.classList.remove('hidden');
+        
+        // If it's already unlocked, just show "Completed"
+        if (unlockedAdvs.includes(id)) {
+            progressDiv.innerText = "Status: Completed!";
+            return;
+        }
+
+        // Calculate progress based on the specific ID
+        let streak = calculateCurrentStreak();
+        let totalWordsAllBooks = 0;
+        entries.forEach(e => {
+            const textOnly = (e.content || "").replace(/<[^>]*>?/gm, '');
+            totalWordsAllBooks += textOnly.trim().length > 0 ? textOnly.trim().split(/\s+/).length : 0;
+        });
+
+        if (id === 'adv-streak-3') progressDiv.innerText = `Progress: ${Math.min(streak, 3)} / 3 Days`;
+        else if (id === 'adv-streak-7') progressDiv.innerText = `Progress: ${Math.min(streak, 7)} / 7 Days`;
+        else if (id === 'adv-streak-30') progressDiv.innerText = `Progress: ${Math.min(streak, 30)} / 30 Days`;
+        else if (id === 'adv-streak-64') progressDiv.innerText = `Progress: ${Math.min(streak, 64)} / 64 Days`;
+        else if (id === 'adv-10k') progressDiv.innerText = `Progress: ${totalWordsAllBooks} / 10,000 Words`;
+        else progressDiv.innerText = "Status: Locked. Keep playing to discover how to unlock!";
+    });
+});
+
 init();

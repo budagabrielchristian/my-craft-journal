@@ -108,6 +108,42 @@ body.time-night::after { opacity: 0.5; }
 .adv-node { display: flex; align-items: center; background-color: rgba(0,0,0,0.2); border: 2px solid #373737; padding: 8px; }
 .adv-node.unlocked { background-color: rgba(85, 255, 85, 0.15); border-color: #55ff55; }
 .adv-node img { width: 32px; height: 32px; margin-right: 15px; image-rendering: pixelated; }
-.adv-title { font-size: 1.2rem; color: #ffff55; text-shadow: 1px 1px 0px #000; }
+.adv-title { 
+    font-size: 1.2rem; 
+    color: #ffff55; 
+    text-shadow: 1px 1px 0px #000; 
+    margin-bottom: 4px; /* NEW: Adds a tiny gap below the title */
+}
 .adv-node.locked .adv-title { color: #aaaaaa; }
-.adv-desc { font-size: 1rem; color: #ffffff; text-shadow: 1px 1px 0px #000; }
+.adv-desc { font-size: 1rem; color: #ffffff; text-shadow: 1px 1px 0px #000; line-height: 1.2;}
+
+/* === ADVANCEMENT PROGRESS BAR STYLES === */
+.adv-node {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.adv-node:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.adv-node img { 
+    width: 32px; 
+    height: 32px; 
+    min-width: 32px; /* NEW: Forces the image to stay exactly 32px wide */
+    margin-right: 15px; 
+    image-rendering: pixelated; 
+}
+
+.adv-progress {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #55ff55; /* Minecraft Green for progress */
+    background-color: rgba(0,0,0,0.5);
+    padding: 4px 8px;
+    border-radius: 2px;
+    border: 1px solid #373737;
+    display: inline-block;
+}
+.adv-progress.hidden {
+    display: none;
+}

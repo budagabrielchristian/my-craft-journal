@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Craft Journal</title>
-    
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="shortcut icon" href="favicon.ico">
-    
     <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -19,17 +17,12 @@
 
     <div id="mobile-overlay"></div>
     <button id="mobile-menu-btn" class="mc-btn">☰</button>
-
     <div id="weather-overlay"></div>
 
     <div id="sidebar">
-        <div id="search-container">
-            <input type="text" id="search-input" placeholder="> Search books...">
-        </div>
-
+        <div id="search-container"><input type="text" id="search-input" placeholder="> Search books..."></div>
         <button id="new-btn" class="mc-btn">Write New Book</button>
         <div id="entry-list"></div>
-        
         <div id="storage-controls">
             <button id="export-btn" class="mc-btn small-btn">Export Chest (Save)</button>
             <label for="import-file" class="mc-btn small-btn import-label">Import Chest (Load)</label>
@@ -37,7 +30,6 @@
             <button id="zen-btn" class="mc-btn small-btn" style="margin-top: 15px;">Campfire Mode</button>
             <button id="adv-btn" class="mc-btn small-btn" style="margin-top: 10px;">Advancements (L)</button>
         </div>
-
         <div id="jukebox-container">
             <div id="now-playing">Music: Paused</div>
             <div class="jukebox-controls">
@@ -49,9 +41,7 @@
 
     <div id="editor-container">
         <div id="book-gui" class="book-animate">
-            <div class="book-header">
-                <input type="text" id="title-input" placeholder="Title...">
-            </div>
+            <div class="book-header"><input type="text" id="title-input" placeholder="Title..."></div>
             <div class="book-sub-header">
                 <div id="dimension-tags">
                     <button class="dim-btn active" data-dim="overworld" title="Overworld (Calm)"><img src="images/OW.png" alt="OW"></button>
@@ -63,13 +53,8 @@
                     <button id="delete-btn" class="mc-btn" style="padding: 4px 8px; font-size: 0.9rem; background-color: #ff5555; color: white; border-bottom-color: #aa0000; border-right-color: #aa0000;">Delete</button>
                 </div>
             </div>
-            
             <div id="quill-editor"></div>
-            
-            <div id="xp-bar-container">
-                <div id="xp-bar-fill"></div>
-                <div id="xp-level">0</div>
-            </div>
+            <div id="xp-bar-container"><div id="xp-bar-fill"></div><div id="xp-level">0</div></div>
         </div>
     </div>
 
@@ -78,10 +63,7 @@
 
     <div id="advancement-toast">
         <div class="toast-icon">!</div>
-        <div class="toast-text">
-            <div class="toast-title">Advancement Made!</div>
-            <div id="toast-desc">Wrote for 3 Days Straight</div>
-        </div>
+        <div class="toast-text"><div class="toast-title">Advancement Made!</div><div id="toast-desc"></div></div>
     </div>
 
     <div id="advancements-screen" class="hidden">
@@ -89,53 +71,28 @@
             <div id="adv-header">Advancements</div>
             <div id="adv-list">
                 
-                <div class="adv-node locked" id="adv-authors">
-                    <img src="favicon-32x32.png" alt="Book" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">Author's Journey</div>
-                        <div class="adv-desc">Write your very first journal entry.</div>
-                    </div>
-                </div>
+                <div class="adv-node locked" id="adv-authors"><img src="favicon-32x32.png" alt="Icon"><div class="adv-info"><div class="adv-title">Author's Journey</div><div class="adv-desc">Write your very first journal entry.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-10k"><img src="favicon-32x32.png" alt="Icon"><div class="adv-info"><div class="adv-title">Librarian</div><div class="adv-desc">Write a total of 10,000 words.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-streak-3"><img src="images/wood.png" alt="Icon"><div class="adv-info"><div class="adv-title">Getting Wood</div><div class="adv-desc">Reach a 3-day writing streak.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-streak-7"><img src="images/stone_pick.png" alt="Icon"><div class="adv-info"><div class="adv-title">Time to Mine!</div><div class="adv-desc">Reach a 7-day writing streak.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-streak-30"><img src="images/diamond.png" alt="Icon"><div class="adv-info"><div class="adv-title">Diamonds!</div><div class="adv-desc">Reach a 30-day writing streak.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-streak-64"><img src="images/gapple.png" alt="Icon"><div class="adv-info"><div class="adv-title">A Full Stack</div><div class="adv-desc">Reach a 64-day writing streak.</div><div class="adv-progress hidden"></div></div></div>
 
-                <div class="adv-node locked" id="adv-10k">
-                    <img src="favicon-32x32.png" alt="Book" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">Librarian</div>
-                        <div class="adv-desc">Write a total of 10,000 words.</div>
-                    </div>
-                </div>
+                <div class="adv-node locked" id="adv-nether"><img src="images/NT.png" alt="Icon"><div class="adv-info"><div class="adv-title">We Need to Go Deeper</div><div class="adv-desc">Write a venting entry in the Nether.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-end"><img src="images/EN.png" alt="Icon"><div class="adv-info"><div class="adv-title">The End?</div><div class="adv-desc">Write a reflective entry in The End.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-zen"><img src="images/campfire.png" alt="Icon"><div class="adv-info"><div class="adv-title">Zen Master</div><div class="adv-desc">Enter Campfire Mode to focus.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-storage"><img src="images/chest.png" alt="Icon"><div class="adv-info"><div class="adv-title">Safe Storage</div><div class="adv-desc">Backup your chest to your computer.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-music"><img src="images/music_disc.png" alt="Icon"><div class="adv-info"><div class="adv-title">Music to my Ears</div><div class="adv-desc">Listen to the Jukebox while writing.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-delete"><img src="images/lava_bucket.png" alt="Icon"><div class="adv-info"><div class="adv-title">Playing with Fire</div><div class="adv-desc">Throw a journal entry into the lava.</div><div class="adv-progress hidden"></div></div></div>
 
-                <div class="adv-node locked" id="adv-nether">
-                    <img src="images/NT.png" alt="Nether" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">We Need to Go Deeper</div>
-                        <div class="adv-desc">Write a venting entry in the Nether.</div>
-                    </div>
-                </div>
+                <div class="adv-node locked" id="adv-img"><img src="images/painting.png" alt="Icon"><div class="adv-info"><div class="adv-title">Masterpiece</div><div class="adv-desc">Insert an image into your journal.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-code"><img src="images/enchanting_table.png" alt="Icon"><div class="adv-info"><div class="adv-title">Enchanter</div><div class="adv-desc">Write in the Standard Galactic Alphabet.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-bullet"><img src="favicon-32x32.png" alt="Icon"><div class="adv-info"><div class="adv-title">Organized Mind</div><div class="adv-desc">Create a bulleted or numbered list.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-color"><img src="images/dye.png" alt="Icon"><div class="adv-info"><div class="adv-title">Colorful Personality</div><div class="adv-desc">Highlight or change the color of your text.</div><div class="adv-progress hidden"></div></div></div>
 
-                <div class="adv-node locked" id="adv-end">
-                    <img src="images/EN.png" alt="End" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">The End?</div>
-                        <div class="adv-desc">Write a reflective entry in The End.</div>
-                    </div>
-                </div>
-
-                <div class="adv-node locked" id="adv-zen">
-                    <img src="images/campfire.png" alt="Campfire" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">Zen Master</div>
-                        <div class="adv-desc">Enter Campfire Mode to focus.</div>
-                    </div>
-                </div>
-
-                <div class="adv-node locked" id="adv-storage">
-                    <img src="images/chest.png" alt="Chest" style="filter: grayscale(100%); opacity: 0.5;">
-                    <div class="adv-info">
-                        <div class="adv-title">Safe Storage</div>
-                        <div class="adv-desc">Backup your chest to your computer.</div>
-                    </div>
-                </div>
+                <div class="adv-node locked" id="adv-night"><img src="images/bed.png" alt="Icon"><div class="adv-info"><div class="adv-title">Night Owl</div><div class="adv-desc">Write an entry between Midnight and 4AM.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-early"><img src="images/sunflower.png" alt="Icon"><div class="adv-info"><div class="adv-title">Early Bird</div><div class="adv-desc">Write an entry between 5AM and 8AM.</div><div class="adv-progress hidden"></div></div></div>
+                <div class="adv-node locked" id="adv-storm"><img src="images/water_bucket.png" alt="Icon"><div class="adv-info"><div class="adv-title">Shelter from the Storm</div><div class="adv-desc">Write in the Overworld while it's raining or snowing.</div><div class="adv-progress hidden"></div></div></div>
 
             </div>
             <button id="close-adv-btn" class="mc-btn">Close</button>
@@ -144,6 +101,5 @@
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script src="script.js"></script>
-
 </body>
 </html>
